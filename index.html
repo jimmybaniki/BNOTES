@@ -413,17 +413,14 @@
         // NOUVELLE LOGIQUE D'AUTHENTIFICATION FIREBASE
         // =========================================================
         
-        // 🚨 ALERTE SÉCURITÉ CRITIQUE: Cette clé API est publiquement exposée.
-        // Vous DEVEZ révoquer cette clé dans la console Google/Firebase et
-        // la remplacer par une variable d'environnement (par exemple, dans un fichier .env non public)
-        // ou la restreindre rigoureusement à votre domaine (bnotes-243.firebaseapp.com).
+        // CORRECTION: CONFIGURATION FIREBASE AVEC VOS VALEURS RÉELLES
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", // CLÉ API
+            apiKey: "AIzaSyAmJ73TSbxCR7amDDleoL2fb2Lhq5m-nAs", // CLÉ API CORRIGÉE
             authDomain: "bnotes-243.firebaseapp.com", // DOMAINE D'AUTHENTIFICATION
             projectId: "bnotes-243", // ID DU PROJET
-            storageBucket: "bnotes-243.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID", // ID DE L'EXPÉDITEUR
-            appId: "YOUR_APP_ID" // ID DE L'APPLICATION
+            storageBucket: "bnotes-243.firebasestorage.app", // CORRECTION: Utilisation du domaine .firebasestorage.app
+            messagingSenderId: "105359848932", // ID DE L'EXPÉDITEUR CORRIGÉ
+            appId: "1:105359848932:web:c9a532483739e17e0343f1" // ID DE L'APPLICATION CORRIGÉ
         };
 
         // Initialiser Firebase
@@ -431,10 +428,11 @@
         const auth = firebase.auth();
         const FacebookProvider = new firebase.auth.FacebookAuthProvider();
         
-        // Demander le nom d'utilisateur public et l'email (nécessaire pour l'authentification Facebook/Firebase)
+        // CORRECTION DE L'ERREUR FACEBOOK 'Invalid Scopes: email'
+        FacebookProvider.addScope('email'); 
+        
+        // Demander le nom d'utilisateur public (public_profile est suffisant)
         FacebookProvider.addScope('public_profile');
-        // ✅ FIX: Ajout du scope 'email' pour résoudre l'erreur "Invalid Scopes: email"
-        FacebookProvider.addScope('email');
         
         /**
          * Met à jour l'interface utilisateur en fonction de l'état de l'utilisateur Firebase.
@@ -479,6 +477,11 @@
                         errorMessage = 'Échec de la connexion réseau.';
                     } else if (error.code === 'auth/operation-not-allowed') {
                         errorMessage = 'Opération non autorisée. Vérifiez la configuration de Facebook dans la Console Firebase.';
+                    } else if (error.code === 'auth/unauthorized-domain') {
+                        // Ajout d'une gestion pour l'erreur de domaine non autorisé
+                        errorMessage = 'Ce domaine n\'est pas autorisé pour l\'authentification OAuth. Veuillez ajouter "jimmybaniki.github.io" dans les "Domaines autorisés" de votre console Firebase (Authentication > Settings).';
+                    } else if (error.code === 'auth/api-key-not-valid') {
+                        errorMessage = 'Clé API invalide. Veuillez vérifier votre configuration Firebase.';
                     }
                     showToast(`Échec de la connexion: ${errorMessage}`, true);
                 });
